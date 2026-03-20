@@ -13,6 +13,15 @@
 - 白天自动切换为浅色主题
 - 晚上自动切换为深色主题
 
+### 如何打包插件
+
+1. 在项目目录打开终端
+2. 执行 `npm install`
+3. 执行 `npm run compile`
+4. 执行 `npm run package:vsix`
+5. 项目根目录会生成 `.vsix` 安装包
+6. 在 VS Code 中通过 `Install from VSIX...` 安装这个插件
+
 ### 如何配置
 
 打开 VS Code 的 `settings.json`，加入下面的配置：
@@ -50,15 +59,6 @@
 - `theme`：对应时间段要切换到的主题名称
 - `label`：可选备注
 
-### 如何打包插件
-
-1. 在项目目录打开终端
-2. 执行 `npm install`
-3. 执行 `npm run compile`
-4. 执行 `npm run package:vsix`
-5. 项目根目录会生成 `.vsix` 安装包
-6. 在 VS Code 中通过 `Install from VSIX...` 安装这个插件
-
 ### 如何使用
 
 1. 安装插件
@@ -76,6 +76,15 @@ For example:
 
 - use a light theme during the day
 - switch to a dark theme at night
+
+### How To Package
+
+1. Open a terminal in the project directory
+2. Run `npm install`
+3. Run `npm run compile`
+4. Run `npm run package:vsix`
+5. A `.vsix` package will be generated in the project root
+6. Install it in VS Code through `Install from VSIX...`
 
 ### How To Configure
 
@@ -113,15 +122,6 @@ Settings reference:
 - `end`: end time in `HH:mm` format
 - `theme`: theme name to apply during the slot
 - `label`: optional note
-
-### How To Package
-
-1. Open a terminal in the project directory
-2. Run `npm install`
-3. Run `npm run compile`
-4. Run `npm run package:vsix`
-5. A `.vsix` package will be generated in the project root
-6. Install it in VS Code through `Install from VSIX...`
 
 ### How To Use
 
