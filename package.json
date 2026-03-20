@@ -1,0 +1,113 @@
+{
+  "name": "time-theme-switcher",
+  "displayName": "Time Theme Switcher",
+  "description": "Automatically switch VS Code themes based on configurable time slots.",
+  "version": "0.0.1",
+  "publisher": "local-dev",
+  "license": "MIT",
+  "keywords": [
+    "vscode",
+    "theme",
+    "dark-theme",
+    "light-theme",
+    "schedule"
+  ],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:timeThemeSwitcher.refreshTheme"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "timeThemeSwitcher.refreshTheme",
+        "title": "Time Theme Switcher: Refresh Theme Now"
+      }
+    ],
+    "configuration": {
+      "title": "Time Theme Switcher",
+      "properties": {
+        "timeThemeSwitcher.enabled": {
+          "type": "boolean",
+          "default": true,
+          "scope": "application",
+          "description": "Enable automatic theme switching."
+        },
+        "timeThemeSwitcher.checkIntervalMinutes": {
+          "type": "number",
+          "default": 1,
+          "minimum": 1,
+          "maximum": 60,
+          "scope": "application",
+          "description": "How often the extension checks whether the theme should change."
+        },
+        "timeThemeSwitcher.showNotifications": {
+          "type": "boolean",
+          "default": false,
+          "scope": "application",
+          "description": "Show a notification whenever the extension changes the active theme."
+        },
+        "timeThemeSwitcher.timeSlots": {
+          "type": "array",
+          "scope": "application",
+          "default": [
+            {
+              "start": "07:00",
+              "end": "18:59",
+              "theme": "Default Light+"
+            },
+            {
+              "start": "19:00",
+              "end": "06:59",
+              "theme": "Default Dark+"
+            }
+          ],
+          "description": "Time slots that map local time ranges to theme names. Each entry must include start, end, and theme. Time format is HH:mm. Slots that cross midnight are supported.",
+          "items": {
+            "type": "object",
+            "required": [
+              "start",
+              "end",
+              "theme"
+            ],
+            "properties": {
+              "start": {
+                "type": "string",
+                "description": "Start time in HH:mm format."
+              },
+              "end": {
+                "type": "string",
+                "description": "End time in HH:mm format."
+              },
+              "theme": {
+                "type": "string",
+                "description": "Exact VS Code theme name to apply during this time slot."
+              },
+              "label": {
+                "type": "string",
+                "description": "Optional label used in logs and notifications."
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package:vsix": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.7.1",
+    "typescript": "^5.4.5"
+  }
+}

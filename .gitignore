@@ -1,0 +1,11 @@
+out
+node_modules
+*.vsix
+*.log
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+.DS_Store
