@@ -51,7 +51,7 @@
 配置项说明：
 
 - `timeThemeSwitcher.enabled`：是否启用自动切换
-- `timeThemeSwitcher.checkIntervalMinutes`：检查频率，单位是分钟
+- `timeThemeSwitcher.checkIntervalMinutes`：兼容保留配置项，当前版本会优先在下一个切换时间点自动唤醒，而不是固定每分钟轮询
 - `timeThemeSwitcher.showNotifications`：切换主题时是否显示通知
 - `timeThemeSwitcher.timeSlots`：时间段配置列表
 - `start`：开始时间，格式为 `HH:mm`
@@ -63,7 +63,7 @@
 
 1. 安装插件
 2. 在 `settings.json` 中配置好时间段和主题名称
-3. 保存配置后，插件会按设定频率自动检查时间并切换主题
+3. 保存配置后，插件会在下一个主题切换时间点自动切换主题
 4. 如果你想立即测试，可以打开命令面板并执行 `Time Theme Switcher: Refresh Theme Now`
 
 ## English
@@ -115,7 +115,7 @@ Open your VS Code `settings.json` and add:
 Settings reference:
 
 - `timeThemeSwitcher.enabled`: enables or disables automatic switching
-- `timeThemeSwitcher.checkIntervalMinutes`: check interval in minutes
+- `timeThemeSwitcher.checkIntervalMinutes`: kept for compatibility; the extension now prefers waking at the next theme-change time instead of polling constantly
 - `timeThemeSwitcher.showNotifications`: shows a notification when the theme changes
 - `timeThemeSwitcher.timeSlots`: list of configured time slots
 - `start`: start time in `HH:mm` format
@@ -127,5 +127,5 @@ Settings reference:
 
 1. Install the extension
 2. Configure your time slots and theme names in `settings.json`
-3. Save the settings and let the extension switch themes automatically
+3. Save the settings and let the extension switch themes automatically at the next matching switch time
 4. To test immediately, open the Command Palette and run `Time Theme Switcher: Refresh Theme Now`

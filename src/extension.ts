@@ -20,10 +20,9 @@ const CONFIG_SECTION = "timeThemeSwitcher";
 const TIME_PATTERN = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
 
 class ThemeScheduler implements vscode.Disposable {
-	private intervalHandle: NodeJS.Timeout | undefined;
+	private timeoutHandle: NodeJS.Timeout | undefined;
 
 	public start(): void {
-		this.resetInterval();
 		void this.refreshTheme();
 	}
 
@@ -32,6 +31,7 @@ class ThemeScheduler implements vscode.Disposable {
 		const enabled = config.get<boolean>("enabled", true);
 
 		if (!enabled) {
+			this.clearScheduledRefresh();
 			if (manual) {
 				void vscode.window.showInformationMessage("Time Theme Switcher is disabled.");
 			}
@@ -40,6 +40,7 @@ class ThemeScheduler implements vscode.Disposable {
 
 		const slots = this.getValidSlots(config.get<RawTimeSlot[]>("timeSlots", []));
 		if (slots.length === 0) {
+			this.clearScheduledRefresh();
 			if (manual) {
 				void vscode.window.showWarningMessage("Time Theme Switcher has no valid time slots configured.");
 			}
@@ -51,6 +52,7 @@ class ThemeScheduler implements vscode.Disposable {
 		const matchingSlot = slots.find((slot) => this.matchesSlot(slot, currentMinutes));
 
 		if (!matchingSlot) {
+			this.scheduleNextRefresh(now, slots);
 			if (manual) {
 				void vscode.window.showWarningMessage("No configured theme slot matches the current time.");
 			}
@@ -60,6 +62,7 @@ class ThemeScheduler implements vscode.Disposable {
 		const workbenchConfig = vscode.workspace.getConfiguration("workbench");
 		const currentTheme = workbenchConfig.get<string>("colorTheme");
 		if (currentTheme === matchingSlot.theme) {
+			this.scheduleNextRefresh(now, slots);
 			if (manual) {
 				void vscode.window.showInformationMessage(`Theme is already "${matchingSlot.theme}".`);
 			}
@@ -79,31 +82,34 @@ class ThemeScheduler implements vscode.Disposable {
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error);
 			void vscode.window.showErrorMessage(`Failed to switch theme: ${message}`);
+		} finally {
+			this.scheduleNextRefresh(now, slots);
 		}
 	}
 
 	public reload(): void {
-		this.resetInterval();
+		this.clearScheduledRefresh();
 		void this.refreshTheme();
 	}
 
 	public dispose(): void {
-		if (this.intervalHandle) {
-			clearInterval(this.intervalHandle);
-			this.intervalHandle = undefined;
+		this.clearScheduledRefresh();
+	}
+
+	private clearScheduledRefresh(): void {
+		if (this.timeoutHandle) {
+			clearTimeout(this.timeoutHandle);
+			this.timeoutHandle = undefined;
 		}
 	}
 
-	private resetInterval(): void {
-		if (this.intervalHandle) {
-			clearInterval(this.intervalHandle);
-		}
+	private scheduleNextRefresh(now: Date, slots: TimeSlot[]): void {
+		this.clearScheduledRefresh();
 
-		const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
-		const intervalMinutes = Math.max(1, config.get<number>("checkIntervalMinutes", 1));
-		this.intervalHandle = setInterval(() => {
+		const nextDelay = this.getNextRefreshDelayMs(now, slots);
+		this.timeoutHandle = setTimeout(() => {
 			void this.refreshTheme();
-		}, intervalMinutes * 60 * 1000);
+		}, nextDelay);
 	}
 
 	private getValidSlots(rawSlots: RawTimeSlot[]): TimeSlot[] {
@@ -144,6 +150,25 @@ class ThemeScheduler implements vscode.Disposable {
 		}
 
 		return currentMinutes >= slot.startMinutes || currentMinutes <= slot.endMinutes;
+	}
+
+	private getNextRefreshDelayMs(now: Date, slots: TimeSlot[]): number {
+		const nextTimes = slots.map((slot) => this.getNextOccurrence(now, slot.startMinutes));
+		const nextTimestamp = Math.min(...nextTimes.map((time) => time.getTime()));
+		const bufferMs = 1000;
+		return Math.max(1000, nextTimestamp - now.getTime() + bufferMs);
+	}
+
+	private getNextOccurrence(now: Date, minutesOfDay: number): Date {
+		const occurrence = new Date(now);
+		occurrence.setSeconds(0, 0);
+		occurrence.setHours(Math.floor(minutesOfDay / 60), minutesOfDay % 60, 0, 0);
+
+		if (occurrence.getTime() <= now.getTime()) {
+			occurrence.setDate(occurrence.getDate() + 1);
+		}
+
+		return occurrence;
 	}
 
 	private toMinutes(value: string): number {
